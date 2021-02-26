@@ -24,7 +24,7 @@ RUN pip install beautifulsoup4 requests
 COPY list-cdk-packages.py .
 RUN CDK_PACKAGES=`./list-cdk-packages.py ${CDK_VERSION}` && pip install `echo $CDK_PACKAGES`
 
-# Install cloud9 (c9) via cli
+# Access to c9 (Cloud9) via CLI.
 RUN npm i -g c9
 
 # AWS CDK, AWS SDK, and Matt's CDK SSO Plugin https://www.npmjs.com/package/cdk-cross-account-plugin
