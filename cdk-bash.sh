@@ -14,11 +14,16 @@ token_file="$HOME/.github_pat_pycdk"
 # Read the token from the file
 token=$(cat "$token_file")
 
-# Attempt to login to ghcr.io using the token
-if docker login ghcr.io -u USERNAME --password-stdin <<< "$token" 2>&1 | grep -q "denied: denied"; then
+result=$(docker login ghcr.io -u USERNAME --password-stdin <<< "$token" 2>&1)
+
+if echo "$result" | grep -q "denied: denied"; then
     echo "❌ GitHub token expired or invalid. Please update $token_file with a valid token."
+elif echo "$result" | grep -q "another_error_message"; then
+    echo "❌ Another specific error message. Handle accordingly."
+elif echo "$result" | grep -q "Login Succeeded"; then
+    echo ""✅ Login Succeeded""
 else
-    echo "✅ Login Succeeded"
+    echo "❓ $result"
 fi
 
 export REGISTRY='ghcr.io/cumulus-technology'
