@@ -1,41 +1,54 @@
+#!/bin/bash
+
 # Docker CDK Bash Env Setup
 # Add to .profile or .bashrc Example:
-#  . ~/pycdk/cdk-bash.sh
+#  . ~/docker-pycdk/cdk-bash.sh
 
 #AWS Example
 # export REGISTRY='421327123456.dkr.REGISTRY.us-west-2.amazonaws.com'
+print_header() {
+    local text="$1"
+    local length=$(( ${#text} + 2 ))
 
-#Github Example
-echo "🐙 Github Login"
+    # Print a line of dashes above and below the text
+    printf '%*s\n' "$length" | tr ' ' '-'
+    echo -e "$text"
+    printf '%*s\n' "$length" | tr ' ' '-'
+}
+
+# GitHub Login
+print_header "🐙 GitHub Login"
+
 # Read the token from the file
-# Define the token file
 token_file="$HOME/.github_pat_pycdk"
-
-# Read the token from the file
 token=$(cat "$token_file")
 
 result=$(docker login ghcr.io -u USERNAME --password-stdin <<< "$token" 2>&1)
 
-if echo "$result" | grep -q "denied: denied"; then
+if grep -q "denied: denied" <<< "$result"; then
     echo "❌ GitHub token expired or invalid. Please update $token_file with a valid token."
-elif echo "$result" | grep -q "another_error_message"; then
+elif grep -q "another_error_message" <<< "$result"; then
     echo "❌ Another specific error message. Handle accordingly."
-elif echo "$result" | grep -q "Login Succeeded"; then
-    echo ""✅ Login Succeeded""
+elif grep -q "Login Succeeded" <<< "$result"; then
+    echo "✅ Login Succeeded"
 else
     echo "❓ $result"
 fi
+echo    # Add a newline
 
 export REGISTRY='ghcr.io/cumulus-technology'
 
 #Use this env var to control the CDK version. "latest" can be replaced with a version number.
 export PYCDKVER=latest
 
-alias aws='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/aws amazon/aws-cli:2.13.3' 
-alias pycdk='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/proj -e PYTHONPATH=".python-local" $REGISTRY/pycdk:$PYCDKVER' 
-alias cdk='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/proj -e PYTHONPATH=".python-local" $REGISTRY/pycdk:$PYCDKVER cdk' 
-alias cdkpip='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/proj -e PYTHONPATH=".python-local" $REGISTRY/pycdk:$PYCDKVER pip' 
+# Aliases
+alias aws='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/aws amazon/aws-cli:2.13.3'
+alias pycdk='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/proj -e PYTHONPATH=".python-local" $REGISTRY/pycdk:$PYCDKVER'
+alias cdk='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/proj -e PYTHONPATH=".python-local" $REGISTRY/pycdk:$PYCDKVER cdk'
+alias cdkpip='docker run --rm -it -v ~/.aws:/root/.aws -v $(pwd):/proj -e PYTHONPATH=".python-local" $REGISTRY/pycdk:$PYCDKVER pip'
 
+# CDK Version
+print_header "🚧 CDK Version"
 echo "🐍 Attempt to set pycdk version based on project. If this fails, latest will be used."
 
 if [ -f cdk_ver.sh ]; then
@@ -50,4 +63,4 @@ if [ "$PYCDKVER" == "latest" ]; then
 else
     echo "🐍 Pycdk Version: $PYCDKVER"
 fi
-
+echo    # Add a newline
