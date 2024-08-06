@@ -7,7 +7,14 @@
 
 Add env bash script to .profile or .bashrc (or .zshenv on a Mac). Example:
 
-``` . ~/pycdk/cdk-bash.sh```
+```bash
+. ~/docker-pycdk/cdk-bash.sh
+```
+
+#### Example .bashrc
+```bash
+. ~/source/cosgiant/docker-pycdk/cdk-bash.sh
+```
 
 ### 2 - Github Access Token
 
@@ -133,7 +140,9 @@ Build instructions are located in the workflows directory. Cumulus maintains cur
 
 Create the docker repository with ecr.yaml.  This only needs to be executed once in the dev environment.
 
-```$ aws cloudformation create-stack --stack-name pycdk-ecr --template-body file://ecr.yaml --profile cos-sso-dev```
+```bash
+$ aws cloudformation create-stack --stack-name pycdk-ecr --template-body file://ecr.yaml --profile cos-sso-dev
+```
 
 ### Manual Image Build (AWS)
 
