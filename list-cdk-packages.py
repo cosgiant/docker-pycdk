@@ -67,7 +67,7 @@ for package_link in soup.find_all('a'):
                 log(f'Ignoring {package_name}')
                 continue
 
-            # Ignore if the package ends in -api
+            # Ignore if the package ends in -alpha
             if package_name.endswith('-alpha'):
                 log(f'Ignoring {package_name}')
                 continue
