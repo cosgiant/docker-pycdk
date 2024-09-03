@@ -8,12 +8,12 @@
 Add env bash script to .profile or .bashrc (or .zshenv on a Mac). Example:
 
 ```bash
-. ~/docker-pycdk/cdk-bash.sh
+. ~/pycdk/cdk-bash.sh
 ```
 
 #### Example .bashrc
 ```bash
-. ~/source/cosgiant/docker-pycdk/cdk-bash.sh
+. ~/source/cosgiant/pycdk/cdk-bash.sh
 ```
 
 ### 2 - Github Access Token
@@ -149,7 +149,7 @@ $ aws cloudformation create-stack --stack-name pycdk-ecr --template-body file://
 The following instructions were used to host in AWS but are no longer used.
 
 ```
-$ cd docker-pycdk
+$ cd pycdk
 $ aws ecr get-login-password --region us-west-2 --profile college-sso-dev | docker login --username AWS --password-stdin $ECR
 $ docker build . -t $ECR/pycdk:1.86.0 -t $ECR/pycdk:latest --build-arg CDK_VERSION=1.86.0
 $ docker push $ECR/pycdk:1.86.0

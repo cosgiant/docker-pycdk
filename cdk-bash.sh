@@ -2,7 +2,7 @@
 
 # Docker CDK Bash Env Setup
 # Add to .profile or .bashrc Example:
-#  . ~/docker-pycdk/cdk-bash.sh
+#  . ~/pycdk/cdk-bash.sh
 
 #AWS Example
 # export REGISTRY='421327123456.dkr.REGISTRY.us-west-2.amazonaws.com'
@@ -36,8 +36,8 @@ else
 fi
 echo    # Add a newline
 
-export REGISTRY='ghcr.io/cumulus-technology'
-# export REGISTRY='ghcr.io/<repo-fork>'
+# export REGISTRY='ghcr.io/cumulus-technology'
+export REGISTRY='ghcr.io/<repo-fork>'
 
 #Use this env var to control the CDK version. "latest" can be replaced with a version number.
 export PYCDKVER=latest
