@@ -97,7 +97,7 @@ Change the PYCDKVER value to control the CDK version used for the project.
 
  - To experiment with new versions, you can use the following.  This will only persist for the bash session. 
 
-        ```export PYCDKVER=2.12.0```
+        ```export PYCDKVER=2.90.0```
 
 Change the AWS_PROFILE value to the AWS profile name you wish to use for the project. The profile(s) will need to be created once per workstation.  See step 3 above for the command.
 

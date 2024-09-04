@@ -34,7 +34,7 @@ jobs:
       - name: Latest Github Release Tag
         uses: rez0n/actions-github-release@v1.7
         id: cdk_release
-        with:
+        env:
           token: ${{ secrets.GITHUB_TOKEN }}
           repository: "aws/aws-cdk"
           type: "latest"
