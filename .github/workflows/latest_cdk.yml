@@ -32,7 +32,7 @@ jobs:
         uses: actions/checkout@v2
 
       - name: Latest Github Release Tag
-        uses: rez0n/actions-github-release@v2.0
+        uses: rez0n/actions-github-release@v1.7
         id: cdk_release
         with:
           token: ${{ secrets.GITHUB_TOKEN }}
