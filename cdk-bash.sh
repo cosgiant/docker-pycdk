@@ -37,7 +37,7 @@ fi
 echo    # Add a newline
 
 # export REGISTRY='ghcr.io/cumulus-technology'
-export REGISTRY='ghcr.io/<repo-fork>'
+export REGISTRY='ghcr.io/cosgiant'
 
 #Use this env var to control the CDK version. "latest" can be replaced with a version number.
 export PYCDKVER=latest
