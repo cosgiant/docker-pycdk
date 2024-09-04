@@ -1,5 +1,5 @@
 # Workflow will build a new PyCDK image based on the
-# latest version from AWS.
+# latest version from AWS. Updated action versions
 
 name: Build the latest CDK
 
