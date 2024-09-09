@@ -1,0 +1,39 @@
+name: "🐳🔐📦 Docker Login and Pull Image"
+
+on:
+  workflow_call:
+    inputs:
+      image_name:
+        description: "🖼️ The name of the Docker image to pull"
+        required: true
+        type: string
+      image_tags:
+        description: "🏷️ Comma-separated list of tags for the Docker image"
+        required: true
+        type: string
+    secrets:
+      GHCR_TOKEN:
+        required: true
+
+jobs:
+  login_and_pull:
+    runs-on: ubuntu-latest
+    outputs:
+      pulled_image: ${{ steps.pull_image.outputs.pulled_image }}
+    steps:
+      - name: "🔐🐳 Docker login to ghcr registry"
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+      - name: "📦🐳 Docker Pull from GitHub Container Registry"
+        id: pull_image
+        run: |
+          IFS=',' read -r -a tags <<< "${{ inputs.image_tags }}"
+          for tag in "${tags[@]}"; do
+            echo "===> Pulling ${{ inputs.image_name }}:$tag"
+            docker pull ${{ inputs.image_name }}:$tag
+          done
+        outputs:
+          pulled_image: ${{ inputs.image_name }}
+
+      - name: "🖼️🐳 Docker Images"
+        run: docker images ${{ inputs.image_name }}
