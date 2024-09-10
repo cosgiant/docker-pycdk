@@ -6,6 +6,8 @@
 
 #AWS Example
 # export REGISTRY='421327123456.dkr.REGISTRY.us-west-2.amazonaws.com'
+echo "🛠️ CDK Bash Env Setup"
+echo "📄 Current File: $BASH_SOURCE"
 print_header() {
     local text="$1"
     local length=$(( ${#text} + 2 ))

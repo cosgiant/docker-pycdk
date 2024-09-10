@@ -48,7 +48,7 @@ jobs:
         id: get-ver
         run: |
           ver=$(echo ${{steps.cdk_release.outputs.release}} | cut -dv -f2)
-          echo "{cdkver}={$ver}" >> $GITHUB_OUTPUT
+          echo "cdkver=$ver" >> $GITHUB_OUTPUT
       # Debug output the CDK version
       - name: CDK Version From Tag
         env: 
