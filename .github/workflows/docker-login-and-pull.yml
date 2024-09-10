@@ -63,7 +63,7 @@ jobs:
           PYCDK_VER: ${{ inputs.image_tags }}
         run: |
           echo "🐳 Docker Login to ${{ inputs.image_registry }} Container Registry"
-          echo "Repository: ${{ github.repository }}"
+          echo "Calling Repository: ${{ github.repository }}"
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           echo "🐳📦 Docker Pull from GitHub Container Registry"
           echo "===> Pulling $PYCDK_REPO:$PYCDK_VER"
