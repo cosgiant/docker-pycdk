@@ -19,9 +19,13 @@ on:
       GHCR_TOKEN:
         required: true
 
+# Set Global permissions
+permissions:
+  packages: read
+  
 jobs:
   login_and_pull:
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
     steps:
       - name: "🔐🐳 Log in to the Container registry"
         id: docker_login_action
