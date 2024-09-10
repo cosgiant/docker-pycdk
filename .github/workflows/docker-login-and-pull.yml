@@ -37,7 +37,7 @@ jobs:
           images: ${{ inputs.image_registry }}/${{ inputs.image_name }}
           tags: |
             type=raw,value=${{inputs.image_tags}}
-            type=raw,value=v{{inputs.image_tags}}
+            type=raw,value=v${{inputs.image_tags}}
             type=raw,value=latest
 
   #type=raw,value=${{inputs.package_registry}}/${{inputs.image_name}}:${{env.PYCDK_VER}}
