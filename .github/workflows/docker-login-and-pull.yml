@@ -55,8 +55,7 @@ jobs:
   #     labels: ${{ steps.meta.outputs.labels }}
   #     build-args: CDK_VERSION=${{ steps.get-ver.outputs.cdkver }}
   #   - name: "🔐🐳 Docker login to ghcr registry"
-  #     run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      - name: "Docker inspect image"
+  #     run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin      
       - name: "🔐🐳 Docker sign in to registry: ${{ inputs.image_registry }}/${{ inputs.image_name }}:${{ inputs.image_tags }}"
         id: docker_login_cli
         env:
