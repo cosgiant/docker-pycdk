@@ -21,9 +21,7 @@ on:
 
 jobs:
   login_and_pull:
-    runs-on: ubuntu-latest
-    permissions:
-        packages: read
+    runs-on: ubuntu-latest    
     steps:
       - name: "🔐🐳 Log in to the Container registry"
         id: docker_login_action
