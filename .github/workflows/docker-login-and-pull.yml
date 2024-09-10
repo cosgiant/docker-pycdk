@@ -33,7 +33,7 @@ jobs:
         with:
           images: ${{ input.package_registry }}/${{ input.image_name }}
           tags: |
-            type=raw,value=${{input.package_registry}}/${{input.image_name}}:2.155.0
+            type=raw,value=${{input.package_registry}}/${{input.image_name}}:${{input.image_version}}
             type=raw,value=${{input.package_registry}}/${{input.image_name}}:${{github.sha}}
             type=raw,value=latest
   #type=raw,value=${{input.package_registry}}/${{input.image_name}}:${{env.PYCDK_VER}}
