@@ -22,7 +22,8 @@ on:
 # Set Global permissions
 permissions:
   packages: read
-  
+  contents: read
+
 jobs:
   login_and_pull:
     runs-on: ubuntu-latest
