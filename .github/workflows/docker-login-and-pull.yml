@@ -22,8 +22,9 @@ on:
 jobs:
   login_and_pull:
     runs-on: ubuntu-latest
-    steps:      
+    steps:
       - name: "🔐🐳 Log in to the Container registry"
+        id: docker_login_action
         uses: docker/login-action@v3.3.0
         with:
           registry: ${{ inputs.image_registry }}
@@ -32,7 +33,7 @@ jobs:
 
       - name: "Extract metadata (tags, labels) for Docker"
         id: meta
-        uses: docker/metadata-action@v5.5.1        
+        uses: docker/metadata-action@v5.5.1
         with:
           images: ${{ inputs.image_registry }}/${{ inputs.image_name }}
           tags: |
@@ -53,10 +54,25 @@ jobs:
   #     tags: ${{ steps.meta.outputs.tags }}
   #     labels: ${{ steps.meta.outputs.labels }}
   #     build-args: CDK_VERSION=${{ steps.get-ver.outputs.cdkver }}
-#   - name: "🔐🐳 Docker login to ghcr registry"
-#     run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+  #   - name: "🔐🐳 Docker login to ghcr registry"
+  #     run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: "🔐🐳 Docker sign in to registry"
+        id: docker_login_cli
+        env:
+          PYCDK_REPO: ${{ inputs.image_registry }}/${{ inputs.image_name }} #${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} #${{ vars.PYCDK_REPO }}
+        run: |
+          echo "🐳 Docker Login to ${{ inputs.image_registry }} Container Registry"
+          echo "Repository: ${{ github.repository }}"
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "🐳📦 Docker Pull from GitHub Container Registry"
+          echo "===> Pulling $PYCDK_REPO:$PYCDK_VER"
+          docker pull $PYCDK_REPO:$PYCDK_VER
+          echo "🐳📦 Docker Images"
+          docker images $PYCDK_REPO:$PYCDK_VER
 
       - name: "📦🐳 Docker Pull from GitHub Container Registry"
+        id: docker_pull
+        
         run: |
           IFS=',' read -r -a tags <<< "${{ inputs.image_tags }}"
           for tag in "${tags[@]}"; do
