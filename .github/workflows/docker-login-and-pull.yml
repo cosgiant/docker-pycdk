@@ -69,7 +69,8 @@ jobs:
         run: |
           echo "🐳 Docker Login to ${{ inputs.image_registry }} Container Registry"
           echo "Calling Repository: ${{ github.repository }}"
-          echo "${{ secrets.AHSENB_PAT_GH_PACKAGES_PYCDK_READONLY }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          # echo "${{ secrets.AHSENB_PAT_GH_PACKAGES_PYCDK_READONLY }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin        
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           echo "🐳📦 Docker Pull from GitHub Container Registry"
           echo "===> Pulling $PYCDK_REPO:$PYCDK_VER"
           docker pull $PYCDK_REPO:$PYCDK_VER
