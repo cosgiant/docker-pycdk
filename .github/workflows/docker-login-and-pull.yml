@@ -3,6 +3,7 @@ name: "🐳🔐📦 Docker Login and Pull Image"
 on:
   workflow_call:
     inputs:
+      package_registry: ghcr.io
       image_name:
         description: "🖼️ The name of the Docker image to pull"
         required: true
@@ -18,17 +19,46 @@ on:
 jobs:
   login_and_pull:
     runs-on: ubuntu-latest
-    steps:
-      - name: "🔐🐳 Docker login to ghcr registry"
-        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+    steps:      
+      - name: "🔐🐳 Log in to the Container registry"
+        uses: docker/login-action@v3.3.0
+        with:
+          registry: ${{ input.package_registry }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "📦🐳 Docker Pull from GitHub Container Registry"
-        run: |
-          IFS=',' read -r -a tags <<< "${{ inputs.image_tags }}"
-          for tag in "${tags[@]}"; do
-            echo "===> Pulling ${{ inputs.image_name }}:$tag"
-            docker pull ${{ inputs.image_name }}:$tag
-          done
+      - name: "Extract metadata (tags, labels) for Docker"
+        id: meta
+        uses: docker/metadata-action@v5.5.1
+        with:
+          images: ${{ input.package_registry }}/${{ input.image_name }}
+          tags: |
+            type=raw,value=${{input.package_registry}}/${{input.image_name}}:2.155.0
+            type=raw,value=${{input.package_registry}}/${{input.image_name}}:${{github.sha}}
+            type=raw,value=latest
+  #type=raw,value=${{input.package_registry}}/${{input.image_name}}:${{env.PYCDK_VER}}
+  # - ghcr.io/cosgiant/pycdk:2.155.0
+  # - ghcr.io/cosgiant/pycdk:v2.155.0
+  # - ghcr.io/cosgiant/pycdk:latest
 
-      - name: "🖼️🐳 Docker Images"
-        run: docker images ${{ inputs.image_name }}
+  # - name: Build and push Docker image
+  #   uses: docker/build-push-action@v6.7.0
+  #   with:
+  #     context: .
+  #     push: true
+  #     tags: ${{ steps.meta.outputs.tags }}
+  #     labels: ${{ steps.meta.outputs.labels }}
+  #     build-args: CDK_VERSION=${{ steps.get-ver.outputs.cdkver }}
+#   - name: "🔐🐳 Docker login to ghcr registry"
+#     run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
+#   - name: "📦🐳 Docker Pull from GitHub Container Registry"
+#     run: |
+#       IFS=',' read -r -a tags <<< "${{ inputs.image_tags }}"
+#       for tag in "${tags[@]}"; do
+#         echo "===> Pulling ${{ inputs.image_name }}:$tag"
+#         docker pull ${{ inputs.image_name }}:$tag
+#       done
+
+#   - name: "🖼️🐳 Docker Images"
+#     run: docker images ${{ inputs.image_name }}
