@@ -56,7 +56,7 @@ jobs:
   #     build-args: CDK_VERSION=${{ steps.get-ver.outputs.cdkver }}
   #   - name: "🔐🐳 Docker login to ghcr registry"
   #     run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      - name: "🔐🐳 Docker sign in to registry"
+      - name: "🔐🐳 Docker sign in to registry: ${{ inputs.image_registry }}/${{ inputs.image_name }}:${{ inputs.image_tags }}"
         id: docker_login_cli
         env:
           PYCDK_REPO: ${{ inputs.image_registry }}/${{ inputs.image_name }} #${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} #${{ vars.PYCDK_REPO }}
@@ -71,7 +71,7 @@ jobs:
           echo "🐳📦 Docker Images"
           docker images $PYCDK_REPO:$PYCDK_VER
 
-      - name: "📦🐳 Docker Pull from GitHub Container Registry"
+      - name: "📦🐳 Docker Pull from Container Registry"
         id: docker_pull
         
         run: |
