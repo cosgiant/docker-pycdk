@@ -60,6 +60,7 @@ jobs:
         id: docker_login_cli
         env:
           PYCDK_REPO: ${{ inputs.image_registry }}/${{ inputs.image_name }} #${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} #${{ vars.PYCDK_REPO }}
+          PYCDK_VER: ${{ inputs.image_tags }}
         run: |
           echo "🐳 Docker Login to ${{ inputs.image_registry }} Container Registry"
           echo "Repository: ${{ github.repository }}"
