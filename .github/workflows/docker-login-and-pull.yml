@@ -59,6 +59,7 @@ jobs:
         env:
           PYCDK_REPO: ${{ inputs.image_registry }}/${{ inputs.image_name }}
           PYCDK_VER: ${{ inputs.image_tags }}
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
         run: |
           echo "Parameters: $PYCDK_REPO:$PYCDK_VER"
           PYCDK_REPO_VER=$PYCDK_REPO:$PYCDK_VER
