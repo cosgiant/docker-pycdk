@@ -73,7 +73,8 @@ jobs:
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
           echo "🐳📦 Docker Pull from GitHub Container Registry"
           echo "===> Pulling $PYCDK_REPO:$PYCDK_VER"
-          docker pull $PYCDK_REPO:$PYCDK_VER
+          echo "===> Pulling $PYCDK_REPO:latest"
+          docker pull $PYCDK_REPO:latest
           echo "🐳📦 Docker Images"
           docker images $PYCDK_REPO:$PYCDK_VER
 
