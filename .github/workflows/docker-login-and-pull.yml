@@ -26,6 +26,7 @@ permissions:
 
 jobs:
   login_and_pull:
+    name: "🔐🐳📦 Docker Login and Pull Registry Image"
     runs-on: ubuntu-latest
     steps:
       - name: "🔐🐳 Log in to the Container registry"
@@ -46,46 +47,35 @@ jobs:
             type=raw,value=v${{inputs.image_tags}}
             type=raw,value=latest
 
-  #type=raw,value=${{inputs.package_registry}}/${{inputs.image_name}}:${{env.PYCDK_VER}}
-  # - ghcr.io/cosgiant/pycdk:2.155.0
-  # - ghcr.io/cosgiant/pycdk:v2.155.0
-  # - ghcr.io/cosgiant/pycdk:latest
-
-  # - name: Build and push Docker image
-  #   uses: docker/build-push-action@v6.7.0
-  #   with:
-  #     context: .
-  #     push: true
-  #     tags: ${{ steps.meta.outputs.tags }}
-  #     labels: ${{ steps.meta.outputs.labels }}
-  #     build-args: CDK_VERSION=${{ steps.get-ver.outputs.cdkver }}
-  #   - name: "🔐🐳 Docker login to ghcr registry"
-  #     run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin      
       - name: "🔐🐳 Docker sign in to registry: ${{ inputs.image_registry }}/${{ inputs.image_name }}:${{ inputs.image_tags }}"
         id: docker_login_cli
-        env:
-          PYCDK_REPO: ${{ inputs.image_registry }}/${{ inputs.image_name }} #${{ env.REGISTRY }}/${{ env.IMAGE_NAME }} #${{ vars.PYCDK_REPO }}
-          PYCDK_VER: ${{ inputs.image_tags }}
         run: |
           echo "🐳 Docker Login to ${{ inputs.image_registry }} Container Registry"
           echo "Calling Repository: ${{ github.repository }}"
-          # echo "${{ secrets.AHSENB_PAT_GH_PACKAGES_PYCDK_READONLY }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin        
           echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-          echo "🐳📦 Docker Pull from GitHub Container Registry"
-          echo "===> Pulling $PYCDK_REPO:$PYCDK_VER"
-          echo "===> Pulling $PYCDK_REPO:latest"
-          docker pull $PYCDK_REPO:latest
-          echo "🐳📦 Docker Images"
-          docker images $PYCDK_REPO:$PYCDK_VER
 
       - name: "📦🐳 Docker Pull from Container Registry"
         id: docker_pull
-        
+        env:
+          PYCDK_REPO: ${{ inputs.image_registry }}/${{ inputs.image_name }}
+          PYCDK_VER: ${{ inputs.image_tags }}
         run: |
+          echo "Parameters: $PYCDK_REPO:$PYCDK_VER"
+          PYCDK_REPO_VER=$PYCDK_REPO:$PYCDK_VER
+          echo "PYCDK_REPO_VER: $PYCDK_REPO_VER"
+          # List available registry packages
+          echo "Listing available packages in the registry"
+          curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+              -H "Accept: application/vnd.github.v3+json" \
+              https://api.github.com/orgs/${{ github.repository_owner }}/packages?package_type=container
+          echo "🐳📦 Docker Pull from GitHub Container Registry"
+          echo "===> Pulling: docker pull $PYCDK_REPO_VER"
+          docker pull $PYCDK_REPO_VER
+
           IFS=',' read -r -a tags <<< "${{ inputs.image_tags }}"
           for tag in "${tags[@]}"; do
             echo "===> Pulling ${{ inputs.image_name }}:$tag"
-            docker pull ${{ inputs.image_name }}:$tag
+            echo "docker pull ${{ inputs.image_name }}:$tag"
           done
 
       - name: "🖼️🐳 Docker Images"
