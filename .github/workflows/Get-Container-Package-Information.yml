@@ -29,9 +29,9 @@ jobs:
         with:
           registry: ${{ inputs.image_registry }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GHCR_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}
         secrets:
-        GHCR_TOKEN: ${{ secrets.GHCR_TOKEN }}
+          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Extract metadata (tags, labels) for Docker"
         id: meta
