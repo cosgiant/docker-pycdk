@@ -42,12 +42,13 @@ jobs:
         id: meta
         uses: docker/metadata-action@v5.5.1
         with:
-          images: ${{ inputs.image_registry }}/${{ inputs.image_name }}
-          tags: |
-            type=ref,event=branch
-            type=ref,event=pr
-            type=semver,pattern={{version}}
-            type=semver,pattern={{major}}.{{minor}}
+          # image_name: cosgiant/pycdk
+          images: ${{ inputs.image_name }}
+          # tags: |
+          #   type=ref,event=branch
+          #   type=ref,event=pr
+          #   type=semver,pattern={{version}}
+          #   type=semver,pattern={{major}}.{{minor}}
 
       - name: "🔐🐳 Docker sign in to registry: ${{ inputs.image_registry }}/${{ inputs.image_name }}:${{ inputs.image_tags }}"
         id: docker_login_cli
@@ -66,7 +67,14 @@ jobs:
           echo "Parameters: $PYCDK_REPO:$PYCDK_VER"
           PYCDK_REPO_VER=$PYCDK_REPO:$PYCDK_VER
           echo "PYCDK_REPO_VER: $PYCDK_REPO_VER"
-          echo "Tags: ${{ steps.meta.outputs.tags }}"
+          # echo "Tags: ${{ steps.meta.outputs.tags }}"
+          echo "JSON: ${{ fromJSON(steps.meta.outputs.json) }}"
+          BUILDTIME=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.created'] }}
+          VERSION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.version'] }}
+          REVISION=${{ fromJSON(steps.meta.outputs.json).labels['org.opencontainers.image.revision'] }}
+          echo "Build Time: $BUILDTIME"
+          echo "Version: $VERSION"
+          echo "Revision: $REVISION"
 
           # # List available registry packages
           # echo "Listing available packages in the registry"
