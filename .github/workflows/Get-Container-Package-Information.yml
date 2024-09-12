@@ -1,4 +1,4 @@
-name: Docker
+name: Get Container Package Info
 
 # This workflow uses actions that are not certified by GitHub.
 # They are provided by a third-party and are governed by
@@ -6,38 +6,14 @@ name: Docker
 # documentation.
 
 on:
-  workflow_dispatch:
-    inputs:
-      build_deploy_choice:
-        description: 'Build, Deploy, or Both'
-        required: true
-        default: 'build_deploy'
-        type: choice
-        options:
-          - build_only
-          - deploy_only
-          - build_deploy
-      environment:
-        type: environment
-        description: Select the environment
-        required: true
-
-  workflow_call:
-    inputs:
-      build_deploy_choice:
-        type: string
-        required: true
-      environment:
-        type: string
-        required: true
-
+  workflow_dispatch: 
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
+  image_registry: ghcr.io
   # github.repository as <account>/<repo>
   IMAGE_NAME: ${{ github.repository }}
   PyCDK_TAG: 2.155.0
-
 
 jobs:
   compare-tags:
@@ -56,10 +32,11 @@ jobs:
         uses: docker/metadata-action@v5.5.1
         with:
           images: ${{ inputs.image_registry }}/${{ inputs.image_name }}
-          tags: |
-            type=raw,value=${{inputs.image_tags}}
-            type=raw,value=v${{inputs.image_tags}}
-            type=raw,value=latest
+          # Limit to certain tags
+          # tags: |
+          #   type=raw,value=${{inputs.image_tags}}
+          #   type=raw,value=v${{inputs.image_tags}}
+          #   type=raw,value=latest
 
       - name: "Compare Tags"
         id: compare_tags
