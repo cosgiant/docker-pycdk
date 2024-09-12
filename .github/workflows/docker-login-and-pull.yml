@@ -35,6 +35,7 @@ jobs:
         with:
           registry: ${{ inputs.image_registry }}
           username: ${{ github.actor }}
+          # username: USERNAME
           password: ${{ secrets.GITHUB_TOKEN }}
 
       - name: "Extract metadata (tags, labels) for Docker"
@@ -42,10 +43,6 @@ jobs:
         uses: docker/metadata-action@v5.5.1
         with:
           images: ${{ inputs.image_registry }}/${{ inputs.image_name }}
-          tags: |
-            type=raw,value=${{inputs.image_tags}}
-            type=raw,value=v${{inputs.image_tags}}
-            type=raw,value=latest
 
       - name: "🔐🐳 Docker sign in to registry: ${{ inputs.image_registry }}/${{ inputs.image_name }}:${{ inputs.image_tags }}"
         id: docker_login_cli
@@ -64,36 +61,38 @@ jobs:
           echo "Parameters: $PYCDK_REPO:$PYCDK_VER"
           PYCDK_REPO_VER=$PYCDK_REPO:$PYCDK_VER
           echo "PYCDK_REPO_VER: $PYCDK_REPO_VER"
-          # List available registry packages
-          echo "Listing available packages in the registry"
-          packages=$(gh api orgs/${{ github.repository_owner }}/packages?package_type=container --jq '.[] | @base64')
-          # Loop through each package to get its tags
-          echo "$packages" | while read -r package; do
-            # Decode the base64 encoded JSON
-            package=$(echo "$package" | base64 --decode)
+          echo "Tags: ${{ steps.meta.outputs.tags }}"
 
-            name=$(echo "$package" | jq -r '.name')
-            package_type=$(echo "$package" | jq -r '.package_type')
+          # # List available registry packages
+          # echo "Listing available packages in the registry"
+          # packages=$(gh api orgs/${{ github.repository_owner }}/packages?package_type=container --jq '.[] | @base64')
+          # # Loop through each package to get its tags
+          # echo "$packages" | while read -r package; do
+          #   # Decode the base64 encoded JSON
+          #   package=$(echo "$package" | base64 --decode)
 
-            # Fetch tags for each package
-            tags=$(gh api orgs/${{ github.repository_owner }}/packages/container/$name/versions --jq '.[].metadata.container.tags | join(", ")' 2>/dev/null || echo "No tags")
+          #   name=$(echo "$package" | jq -r '.name')
+          #   package_type=$(echo "$package" | jq -r '.package_type')
 
-            # Print package details with tags
-            echo "Package: $name"
-            echo "Type: $package_type"
-            echo "Tags: $tags"
-            echo "----------------------"
-          done
-          
-          echo "🐳📦 Docker Pull from GitHub Container Registry"
-          echo "===> Pulling: docker pull $PYCDK_REPO_VER"
-          docker pull $PYCDK_REPO_VER
+          #   # Fetch tags for each package
+          #   tags=$(gh api orgs/${{ github.repository_owner }}/packages/container/$name/versions --jq '.[].metadata.container.tags | join(", ")' 2>/dev/null || echo "No tags")
 
-          IFS=',' read -r -a tags <<< "${{ inputs.image_tags }}"
-          for tag in "${tags[@]}"; do
-            echo "===> Pulling ${{ inputs.image_name }}:$tag"
-            echo "docker pull ${{ inputs.image_name }}:$tag"
-          done
+          #   # Print package details with tags
+          #   echo "Package: $name"
+          #   echo "Type: $package_type"
+          #   echo "Tags: $tags"
+          #   echo "----------------------"
+          # done
+
+          # echo "🐳📦 Docker Pull from GitHub Container Registry"
+          # echo "===> Pulling: docker pull $PYCDK_REPO_VER"
+          # docker pull $PYCDK_REPO_VER
+
+          # IFS=',' read -r -a tags <<< "${{ inputs.image_tags }}"
+          # for tag in "${tags[@]}"; do
+          #   echo "===> Pulling ${{ inputs.image_name }}:$tag"
+          #   echo "docker pull ${{ inputs.image_name }}:$tag"
+          # done
 
       - name: "🖼️🐳 Docker Images"
         run: |
