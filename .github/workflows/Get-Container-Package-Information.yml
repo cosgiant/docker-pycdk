@@ -11,7 +11,7 @@ env:
   registry: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   PyCDK_TAG: 2.155.0
-  repo_owner: ${{ github.GITHUB_REPOSITORY_OWNER }}
+  repo_owner: ${{ github.repository_owner }}
 
 jobs:
   compare-tags:
@@ -42,6 +42,7 @@ jobs:
           echo "=================="
           echo "Actor: ${{ github.actor }}"
           echo "repository: ${{ github.repository }}"
+          echo "repository_owner: ${{ github.repository_owner }}
           echo "------------------"
 
       # - name: "🔐🐳 Login to the Container registry"
