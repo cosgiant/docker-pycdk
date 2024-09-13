@@ -10,8 +10,7 @@ on:
 env:
   # Use docker.io for Docker Hub if empty
   REGISTRY: ghcr.io
-  image_registry: ghcr.io
-  # github.repository as <account>/<repo>
+  image_registry: ghcr.io  
   IMAGE_NAME: ${{ github.repository }}
   PyCDK_TAG: 2.155.0
 
@@ -29,9 +28,7 @@ jobs:
         with:
           registry: ${{ inputs.image_registry }}
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
-        secrets:
-          GHCR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.GITHUB_TOKEN }}        
 
       - name: "Extract metadata (tags, labels) for Docker"
         id: meta
@@ -57,6 +54,11 @@ jobs:
             echo "Tags do not match!"
             exit 1
           fi
+        env:
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          # build-args: CDK_VERSION=${{ steps.meta.outputs.cdkver }}
+          
   # build:
 
   #   runs-on: ubuntu-latest
