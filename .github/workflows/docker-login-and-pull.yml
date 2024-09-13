@@ -3,22 +3,19 @@ name: "🐳🔐📦 Docker Login and Pull Image"
 on:
   workflow_call:
     inputs:
-      image_registry:
-        description: "ghcr.io or other package registry"
-        required: true
-        type: string
-      image_name:
-        description: "🖼️ The name of the Docker image to pull"
-        required: true
-        type: string
-      image_tags:
-        description: "🏷️ Comma-separated list of tags for the Docker image"
+      image_tag:
+        description: "🏷️ Tag for the ${{ github.GITHUB_REPOSITORY }} version to use."
         required: true
         type: string
     secrets:
       GHCR_TOKEN:
         required: true
 
+env:
+  registry: ghcr.io
+  repo_owner: ${{ github.GITHUB_REPOSITORY_OWNER }}
+  
+      
 # Set Global permissions
 permissions:
   packages: read
@@ -28,44 +25,99 @@ jobs:
   login_and_pull:
     name: "🔐🐳📦 Docker Login and Pull Registry Image"
     runs-on: ubuntu-latest
-    steps:
-      - name: "🔐🐳 Log in to the Container registry: ${{ inputs.image_registry }}"
-        id: docker_login_action
-        uses: docker/login-action@v3.3.0
-        with:
-          registry: ${{ inputs.image_registry }}
-          username: ${{ github.actor }}
-          # username: USERNAME
-          password: ${{ secrets.GITHUB_TOKEN }}
       
-      - name: "Extract metadata (tags, labels) for Docker: ${{ inputs.image_registry }}/${{ inputs.image_name }}"
-        id: meta
-        uses: docker/metadata-action@v5.5.1
-        with:
-          images: ${{ inputs.image_registry }}/${{ inputs.image_name }}
-          tags: |
-            type=raw,value=${{inputs.image_tags}}
-            type=raw,value=v${{inputs.image_tags}}
-
-      - name: "🔐🐳 Docker sign in to registry: ${{ inputs.image_registry }}/${{ inputs.image_name }}:${{ inputs.image_tags }}"
-        id: docker_login_cli
+    steps:
+      - name: "Actions Values"
+        id: actions-values
         run: |
-          echo "🐳 Docker Login to ${{ inputs.image_registry }} Container Registry"
-          echo "Calling Repository: ${{ github.repository }}"
-          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+          echo "=================="
+          echo "Input: "
+          echo "=================="
+          echo "container_tag: ${{ inputs.image_tag }}"
+          echo ""
+          echo "=================="
+          echo "Env:"
+          echo "Registry: ${{ env.registry }}"
+          echo "repo_owner: ${{ env.repo_owner }}"
+          echo ""
+          echo "=================="
+          echo "GitHub:
+          echo "=================="
+          echo "Actor: ${{ github.actor }}"
+          echo "repository: ${{ github.repository }}"
+          echo ""
 
-      - name: "📦🐳 Docker Pull from Container Registry"
-        id: docker_pull
-        env:
-          PYCDK_REPO: ${{ inputs.image_registry }}/${{ inputs.image_name }}
-          PYCDK_VER: ${{ inputs.image_tags }}
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
-        run: |
-          echo "Parameters: $PYCDK_REPO:$PYCDK_VER"
-          PYCDK_REPO_VER=$PYCDK_REPO:$PYCDK_VER
-          echo "PYCDK_REPO_VER: $PYCDK_REPO_VER"
+      # - name: "🔐🐳 Log in to the Container registry: ${{ env.registry }}"
+      #   id: docker_login_action
+      #   uses: docker/login-action@v3.3.0
+      #   with:
+      #     registry: ${{ env.registry }}
+      #     username: ${{ github.actor }}
+      #     # username: USERNAME
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+      
+      # - name: "🔐🐳 Docker sign in to registry: ${{ github.repository }}"
+      #   id: docker_login_cli
+      #   run: |
+      #     echo "🐳 Docker Login to ${{ env.registry }} Container Registry"
+      #     echo "Calling Repository: ${{ github.repository }}"
+      #     echo "${{ secrets.GITHUB_TOKEN }}" | docker login ${{ env.registry }} -u ${{ github.actor }} --password-stdin
+
+      # # Step 3: List all tags for the repository in ghcr.io
+      # - name: Fetch tags from Registry
+      #   id: fetch_tags
+      #   run: |
+      #     REPO=${{ env.registry }}/${{ github.repository }}
+      #     packages=$(gh api orgs/${{ env.repo_owner }}/packages/container/pycdk/versions \
+      #       | jq -r '[.[].metadata.container.tags[] | select(test("^[0-9]+\\.[0-9]+\\.[0-9]+$"))] | unique | .[]')
+      #     echo "Existing tags in GHCR: $EXISTING_TAGS"
+      #     echo "existing_tags=$EXISTING_TAGS" >> $GITHUB_ENV
+
+      # # Step 4: Compare release tags and check if they exist in GHCR
+      # - name: Compare tags and check if release tags exist - ${{ inputs.image_tag }}
+      #   run: |
+      #     RELEASE_TAGS="${{ steps.meta.outputs.tags }}"
+      #     echo "Generated release tags: $RELEASE_TAGS"
           
-          echo "===> Metadata:"
+      #     for TAG in $RELEASE_TAGS; do
+      #       if echo "${{ env.existing_tags }}" | grep -qw "$TAG"; then
+      #         echo "Tag $TAG exists in GHCR."
+      #       else
+      #         echo "Tag $TAG does not exist in GHCR."
+      #       fi
+      #     done
+
+      # - name: "Compare Tags"
+      #   id: compare_tags
+      #   run: |
+      #     PYCDK_TAG=${{ inputs.image_tag }}
+      #     META_TAG=${{ steps.meta.outputs.tags }}
+      #     echo "PYCDK_TAG: ${{ env.PYCDK_TAG }}"
+      #     echo "META_TAG: $META_TAG"
+      #     echo "tags: $tags - labels: $labels - build: $build"
+      #     #if [ "$PYCDK_TAG" = "$META_TAG" ]; then
+      #     #  echo "Tags match!"
+      #     #else
+      #     #  echo "Tags do not match!"
+      #     #  exit 1
+      #     #fi
+      #   env:
+      #     tags: ${{ steps.meta.outputs.tags }}
+      #     labels: ${{ steps.meta.outputs.labels }}
+      #     build-args: CDK_VERSION=${{ steps.meta.outputs.annotations }}
+          
+      # - name: "📦🐳 Docker Pull from Container Registry"
+      #   id: docker_pull
+      #   env:
+      #     PYCDK_REPO: ${{ env.registry }}/${{ inputs.image_name }}
+      #     PYCDK_VER: ${{ inputs.image_tag }}
+      #     GH_TOKEN: ${{ secrets.GITHUB_TOKEN  }}
+      #   run: |
+      #     echo "Parameters: $PYCDK_REPO:$PYCDK_VER"
+      #     PYCDK_REPO_VER=$PYCDK_REPO:$PYCDK_VER
+      #     echo "PYCDK_REPO_VER: $PYCDK_REPO_VER"
+          
+      #     echo "===> Metadata:"
           # # List available registry packages
           # echo "Listing available packages in the registry"
           # packages=$(gh api orgs/${{ github.repository_owner }}/packages?package_type=container --jq '.[] | @base64')
@@ -91,13 +143,13 @@ jobs:
           # echo "===> Pulling: docker pull $PYCDK_REPO_VER"
           # docker pull $PYCDK_REPO_VER
 
-          # IFS=',' read -r -a tags <<< "${{ inputs.image_tags }}"
+          # IFS=',' read -r -a tags <<< "${{ inputs.image_tag }}"
           # for tag in "${tags[@]}"; do
           #   echo "===> Pulling ${{ inputs.image_name }}:$tag"
           #   echo "docker pull ${{ inputs.image_name }}:$tag"
           # done
 
-      - name: "🖼️🐳 Docker Images"
-        run: |
-          echo "Docker images: ${{ inputs.image_name }}"
-          docker images ${{ inputs.image_name }}
+     # - name: "🖼️🐳 Docker Images"
+     #   run: |
+     #     echo "Docker images: ${{ inputs.image_name }}"
+     #     docker images ${{ inputs.image_name }}
