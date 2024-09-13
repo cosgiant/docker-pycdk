@@ -25,15 +25,18 @@ jobs:
         id: actions-values
         run: |
           echo "=================="
-          echo "Input: "
+          echo "Input:"
           echo "=================="
           echo "container_tag: ${{ env.PyCDK_TAG }}"
           echo "------------------"
+          
           echo "=================="
           echo "Env:"
+          echo "=================="
           echo "Registry: ${{ env.registry }}"
           echo "repo_owner: ${{ env.repo_owner }}"
           echo "------------------"
+          
           echo "=================="
           echo "GitHub:"
           echo "=================="
