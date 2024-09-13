@@ -30,69 +30,46 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: "Extract metadata (tags, labels) for Docker"
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Step 1: Generate tags based on GitHub releases using docker/metadata-action
+      - name: "Generate metadata (tags, labels) for Docker from Releases"
         id: meta
         uses: docker/metadata-action@v5.5.1
         with:
-          images: ${{ inputs.image_registry }}/${{ inputs.image_name }}
+          images: ghcr.io/${{ github.repository }}/pycdk
           tags: |
-            type=raw,value=${{inputs.image_tags}}
-            type=raw,value=v${{inputs.image_tags}}
-            
-          # type=ref,event=branch
-          # type=sha
+            type=ref,event=release
+            type=sha
 
-      # Step 1: Authenticate to GitHub Container Registry (ghcr.io)
+      # Step 2: Authenticate to GitHub Container Registry (ghcr.io)
       - name: Authenticate to GitHub Container Registry
         run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
-      
-      # Step 2: Use GitHub API to list all tags for the repository in ghcr.io and check if the tag exists
-      - name: Check if tag exists in GHCR
-        id: check_tag
+
+      # Step 3: List all tags for the repository in ghcr.io
+      - name: Fetch tags from GHCR
+        id: fetch_tags
         run: |
-          IMAGE_TAG=${{ steps.meta.outputs.tags }}
-          REPO=${{ inputs.image_registry }}/${{ inputs.image_name }}
+          REPO=ghcr.io/${{ github.repository }}/pycdk
+          EXISTING_TAGS=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://ghcr.io/v2/${{ github.repository }}/pycdk/tags/list | jq -r '.tags[]')
+          echo "Existing tags in GHCR: $EXISTING_TAGS"
+          echo "existing_tags=$EXISTING_TAGS" >> $GITHUB_ENV
+
+      # Step 4: Compare release tags and check if they exist in GHCR
+      - name: Compare tags and check if release tags exist
+        run: |
+          RELEASE_TAGS="${{ steps.meta.outputs.tags }}"
+          echo "Generated release tags: $RELEASE_TAGS"
           
-          # Fetch the list of tags from ghcr.io
-          TAG_EXISTS=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            https://ghcr.io/v2/${{ inputs.image_name }}/tags/list | jq -r ".tags[]" | grep -w "$IMAGE_TAG" || true)
-            #https://ghcr.io/v2/${{ github.repository }}/my-image/tags/list | jq -r ".tags[]" | grep -w "$IMAGE_TAG" || true)
-
-          if [ -z "$TAG_EXISTS" ]; then
-            echo "Tag $IMAGE_TAG does not exist in the registry."
-            echo "exists=false" >> $GITHUB_ENV
-          else
-            echo "Tag $IMAGE_TAG exists in the registry."
-            echo "exists=true" >> $GITHUB_ENV
-          fi
-
-      # Step 3: Conditional step based on tag existence
-      - name: Tag exists, do something
-        if: env.exists == 'true'
-        run: |
-          echo "The tag exists, proceeding with the next steps."
-          # Add your next steps here
-
-      - name: Tag does not exist, do something else
-        if: env.exists == 'false'
-        run: |
-          echo "The tag does not exist, taking alternative action."
-          # Add your alternative steps here          
-      
-      # Step 3: List out generated tags
-      - name: List all generated tags
-        run: |
-          echo "Generated tags: ${{ steps.meta.outputs.tags }}"
-      #- name: "Extract metadata (tags, labels) for Docker"
-      #  id: meta
-      #  uses: docker/metadata-action@v5.5.1
-      #  with:
-      #    images: ${{ inputs.image_registry }}/${{ inputs.image_name }}
-          # Limit to certain tags
-          # tags: |
-          #   type=raw,value=${{inputs.image_tags}}
-          #   type=raw,value=v${{inputs.image_tags}}
-          #   type=raw,value=latest
+          for TAG in $RELEASE_TAGS; do
+            if echo "${{ env.existing_tags }}" | grep -qw "$TAG"; then
+              echo "Tag $TAG exists in GHCR."
+            else
+              echo "Tag $TAG does not exist in GHCR."
+            fi
+          done
 
       - name: "Compare Tags"
         id: compare_tags
