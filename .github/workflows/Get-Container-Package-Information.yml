@@ -27,7 +27,7 @@ jobs:
           echo "=================="
           echo "Input: "
           echo "=================="
-          echo "container_tag: ${{ inputs.image_tag }}"
+          echo "container_tag: ${{ env.PyCDK_TAG }}"
           echo "------------------"
           echo "=================="
           echo "Env:"
@@ -35,7 +35,7 @@ jobs:
           echo "repo_owner: ${{ env.repo_owner }}"
           echo "------------------"
           echo "=================="
-          echo "GitHub:
+          echo "GitHub:"
           echo "=================="
           echo "Actor: ${{ github.actor }}"
           echo "repository: ${{ github.repository }}"
