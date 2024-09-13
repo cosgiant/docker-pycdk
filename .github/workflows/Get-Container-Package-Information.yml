@@ -60,7 +60,7 @@ jobs:
         run: |
           PYCDK_TAG=${{ inputs.image_tags }}
           META_TAG=${{ steps.meta.outputs.tags }}
-          echo "PYCDK_TAG: $PYCDK_TAG"
+          echo "PYCDK_TAG: ${{ env.PYCDK_TAG }}"
           echo "META_TAG: $META_TAG"
           echo "tags: $tags - labels: $labels - build: $build"
           #if [ "$PYCDK_TAG" = "$META_TAG" ]; then
@@ -69,10 +69,10 @@ jobs:
           #  echo "Tags do not match!"
           #  exit 1
           #fi
-     #   env:
-     #     tags: ${{ steps.meta.outputs.tags }}
-     #     labels: ${{ steps.meta.outputs.labels }}
-          # build-args: CDK_VERSION=${{ steps.meta.outputs.cdkver }}
+        env:
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
+          build-args: CDK_VERSION=${{ steps.meta.outputs.annotations }}
           
   # build:
 
