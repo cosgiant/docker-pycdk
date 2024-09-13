@@ -8,11 +8,10 @@ name: Get Container Package Info
 on:
   workflow_dispatch: 
 env:
-  # Use docker.io for Docker Hub if empty
-  REGISTRY: ghcr.io
-  image_registry: ghcr.io  
+  registry: ghcr.io
   IMAGE_NAME: ${{ github.repository }}
   PyCDK_TAG: 2.155.0
+  repo_owner: ${{ github.GITHUB_REPOSITORY_OWNER }}
 
 jobs:
   compare-tags:
@@ -22,16 +21,36 @@ jobs:
       packages: read
       contents: read
     steps:
-      - name: "🔐🐳 Login to the Container registry"
-        id: docker_login_action
-        uses: docker/login-action@v3.3.0
-        with:
-          registry: ${{ env.REGISTRY }}
-          username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: "Actions Values"
+        id: actions-values
+        run: |
+          echo "=================="
+          echo "Input: "
+          echo "=================="
+          echo "container_tag: ${{ inputs.image_tag }}"
+          echo ""
+          echo "=================="
+          echo "Env:"
+          echo "Registry: ${{ env.registry }}"
+          echo "repo_owner: ${{ env.repo_owner }}"
+          echo ""
+          echo "=================="
+          echo "GitHub:
+          echo "=================="
+          echo "Actor: ${{ github.actor }}"
+          echo "repository: ${{ github.repository }}"
+          echo ""
 
-      - name: Checkout code
-        uses: actions/checkout@v3
+      # - name: "🔐🐳 Login to the Container registry"
+      #   id: docker_login_action
+      #   uses: docker/login-action@v3.3.0
+      #   with:
+      #     registry: ${{ env.REGISTRY }}
+      #     username: ${{ github.actor }}
+      #     password: ${{ secrets.GITHUB_TOKEN }}
+
+      # - name: Checkout code
+      #   uses: actions/checkout@v3
 
       # Step 1: Generate tags based on GitHub releases using docker/metadata-action
       #- name: "Generate metadata (tags, labels) for Docker from Releases"
@@ -44,52 +63,52 @@ jobs:
       #      type=sha
 
       # Step 2: Authenticate to GitHub Container Registry (ghcr.io)
-      - name: Authenticate to GitHub Container Registry
-        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      # - name: Authenticate to GitHub Container Registry
+      #   run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      # Step 3: List all tags for the repository in ghcr.io
-      - name: Fetch tags from GHCR
-        id: fetch_tags
-        run: |
-          REPO=ghcr.io/${{ github.repository }}
-          EXISTING_TAGS=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
-            https://ghcr.io/v2/${{ github.repository }}/tags/list | jq -r '.tags[]')
-          echo "Existing tags in GHCR: $EXISTING_TAGS"
-          echo "existing_tags=$EXISTING_TAGS" >> $GITHUB_ENV
+      # # Step 3: List all tags for the repository in ghcr.io
+      # - name: Fetch tags from GHCR
+      #   id: fetch_tags
+      #   run: |
+      #     REPO=ghcr.io/${{ github.repository }}
+      #     EXISTING_TAGS=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+      #       https://ghcr.io/v2/${{ github.repository }}/tags/list | jq -r '.tags[]')
+      #     echo "Existing tags in GHCR: $EXISTING_TAGS"
+      #     echo "existing_tags=$EXISTING_TAGS" >> $GITHUB_ENV
 
-      # Step 4: Compare release tags and check if they exist in GHCR
-      - name: Compare tags and check if release tags exist
-        run: |
-          RELEASE_TAGS="${{ steps.meta.outputs.tags }}"
-          echo "Generated release tags: $RELEASE_TAGS"
+      # # Step 4: Compare release tags and check if they exist in GHCR
+      # - name: Compare tags and check if release tags exist
+      #   run: |
+      #     RELEASE_TAGS="${{ steps.meta.outputs.tags }}"
+      #     echo "Generated release tags: $RELEASE_TAGS"
           
-          for TAG in $RELEASE_TAGS; do
-            if echo "${{ env.existing_tags }}" | grep -qw "$TAG"; then
-              echo "Tag $TAG exists in GHCR."
-            else
-              echo "Tag $TAG does not exist in GHCR."
-            fi
-          done
+      #     for TAG in $RELEASE_TAGS; do
+      #       if echo "${{ env.existing_tags }}" | grep -qw "$TAG"; then
+      #         echo "Tag $TAG exists in GHCR."
+      #       else
+      #         echo "Tag $TAG does not exist in GHCR."
+      #       fi
+      #     done
 
-      - name: "Compare Tags"
-        id: compare_tags
-        run: |
-          PYCDK_TAG=${{ inputs.image_tags }}
-          META_TAG=${{ steps.meta.outputs.tags }}
-          echo "PYCDK_TAG: ${{ env.PYCDK_TAG }}"
-          echo "META_TAG: $META_TAG"
-          echo "tags: $tags - labels: $labels - build: $build"
-          #if [ "$PYCDK_TAG" = "$META_TAG" ]; then
-          #  echo "Tags match!"
-          #else
-          #  echo "Tags do not match!"
-          #  exit 1
-          #fi
-        env:
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
-          build-args: CDK_VERSION=${{ steps.meta.outputs.annotations }}
-          
+      # - name: "Compare Tags"
+      #   id: compare_tags
+      #   run: |
+      #     PYCDK_TAG=${{ inputs.image_tags }}
+      #     META_TAG=${{ steps.meta.outputs.tags }}
+      #     echo "PYCDK_TAG: ${{ env.PYCDK_TAG }}"
+      #     echo "META_TAG: $META_TAG"
+      #     echo "tags: $tags - labels: $labels - build: $build"
+      #     #if [ "$PYCDK_TAG" = "$META_TAG" ]; then
+      #     #  echo "Tags match!"
+      #     #else
+      #     #  echo "Tags do not match!"
+      #     #  exit 1
+      #     #fi
+      #   env:
+      #     tags: ${{ steps.meta.outputs.tags }}
+      #     labels: ${{ steps.meta.outputs.labels }}
+      #     build-args: CDK_VERSION=${{ steps.meta.outputs.annotations }}
+
   # build:
 
   #   runs-on: ubuntu-latest
