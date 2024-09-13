@@ -28,18 +28,18 @@ jobs:
           echo "Input: "
           echo "=================="
           echo "container_tag: ${{ inputs.image_tag }}"
-          echo ""
+          echo "------------------"
           echo "=================="
           echo "Env:"
           echo "Registry: ${{ env.registry }}"
           echo "repo_owner: ${{ env.repo_owner }}"
-          echo ""
+          echo "------------------"
           echo "=================="
           echo "GitHub:
           echo "=================="
           echo "Actor: ${{ github.actor }}"
           echo "repository: ${{ github.repository }}"
-          echo ""
+          echo "------------------"
 
       # - name: "🔐🐳 Login to the Container registry"
       #   id: docker_login_action
