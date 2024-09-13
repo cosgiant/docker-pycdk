@@ -36,8 +36,11 @@ jobs:
         with:
           images: ${{ inputs.image_registry }}/${{ inputs.image_name }}
           tags: |
-            type=ref,event=branch
-            type=sha
+            type=raw,value=${{inputs.image_tags}}
+            type=raw,value=v${{inputs.image_tags}}
+            
+          # type=ref,event=branch
+          # type=sha
 
       # Step 1: Authenticate to GitHub Container Registry (ghcr.io)
       - name: Authenticate to GitHub Container Registry
