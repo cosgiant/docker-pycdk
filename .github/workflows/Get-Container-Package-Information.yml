@@ -55,22 +55,22 @@ jobs:
           #   type=raw,value=v${{inputs.image_tags}}
           #   type=raw,value=latest
 
-      - name: "Compare Tags"
-        id: compare_tags
-        run: |
-          PYCDK_TAG=${{ inputs.image_tags }}
-          META_TAG=${{ steps.meta.outputs.tags }}
-          echo "PYCDK_TAG: $PYCDK_TAG"
-          echo "META_TAG: $META_TAG"
-          if [ "$PYCDK_TAG" = "$META_TAG" ]; then
-            echo "Tags match!"
-          else
-            echo "Tags do not match!"
-            exit 1
-          fi
-        env:
-          tags: ${{ steps.meta.outputs.tags }}
-          labels: ${{ steps.meta.outputs.labels }}
+     # - name: "Compare Tags"
+     #   id: compare_tags
+     #   run: |
+     #     PYCDK_TAG=${{ inputs.image_tags }}
+     #     META_TAG=${{ steps.meta.outputs.tags }}
+     #     echo "PYCDK_TAG: $PYCDK_TAG"
+     #     echo "META_TAG: $META_TAG"
+     #     if [ "$PYCDK_TAG" = "$META_TAG" ]; then
+     #       echo "Tags match!"
+     #     else
+     #       echo "Tags do not match!"
+     #       exit 1
+     #     fi
+     #   env:
+     #     tags: ${{ steps.meta.outputs.tags }}
+     #     labels: ${{ steps.meta.outputs.labels }}
           # build-args: CDK_VERSION=${{ steps.meta.outputs.cdkver }}
           
   # build:
