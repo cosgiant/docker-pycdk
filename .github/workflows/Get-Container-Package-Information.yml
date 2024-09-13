@@ -35,6 +35,20 @@ jobs:
         uses: docker/metadata-action@v5.5.1
         with:
           images: ${{ inputs.image_registry }}/${{ inputs.image_name }}
+          tags: |
+            type=ref,event=branch
+            type=ref,event=tag
+            type=semver,pattern={{version}}
+      
+      # Step 3: List out generated tags
+      - name: List all generated tags
+        run: |
+          echo "Generated tags: ${{ steps.meta.outputs.tags }}"
+      #- name: "Extract metadata (tags, labels) for Docker"
+      #  id: meta
+      #  uses: docker/metadata-action@v5.5.1
+      #  with:
+      #    images: ${{ inputs.image_registry }}/${{ inputs.image_name }}
           # Limit to certain tags
           # tags: |
           #   type=raw,value=${{inputs.image_tags}}
