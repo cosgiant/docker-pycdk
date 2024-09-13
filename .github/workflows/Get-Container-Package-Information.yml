@@ -37,8 +37,43 @@ jobs:
           images: ${{ inputs.image_registry }}/${{ inputs.image_name }}
           tags: |
             type=ref,event=branch
-            type=ref,event=tag
-            type=semver,pattern={{version}}
+            type=sha
+
+      # Step 1: Authenticate to GitHub Container Registry (ghcr.io)
+      - name: Authenticate to GitHub Container Registry
+        run: echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      
+      # Step 2: Use GitHub API to list all tags for the repository in ghcr.io and check if the tag exists
+      - name: Check if tag exists in GHCR
+        id: check_tag
+        run: |
+          IMAGE_TAG=${{ steps.meta.outputs.tags }}
+          REPO=ghcr.io/${{ github.repository }}/my-image
+          
+          # Fetch the list of tags from ghcr.io
+          TAG_EXISTS=$(curl -H "Authorization: Bearer ${{ secrets.GITHUB_TOKEN }}" \
+            https://ghcr.io/v2/${{ github.repository }}/my-image/tags/list | jq -r ".tags[]" | grep -w "$IMAGE_TAG" || true)
+
+          if [ -z "$TAG_EXISTS" ]; then
+            echo "Tag $IMAGE_TAG does not exist in the registry."
+            echo "exists=false" >> $GITHUB_ENV
+          else
+            echo "Tag $IMAGE_TAG exists in the registry."
+            echo "exists=true" >> $GITHUB_ENV
+          fi
+
+      # Step 3: Conditional step based on tag existence
+      - name: Tag exists, do something
+        if: env.exists == 'true'
+        run: |
+          echo "The tag exists, proceeding with the next steps."
+          # Add your next steps here
+
+      - name: Tag does not exist, do something else
+        if: env.exists == 'false'
+        run: |
+          echo "The tag does not exist, taking alternative action."
+          # Add your alternative steps here          
       
       # Step 3: List out generated tags
       - name: List all generated tags
